@@ -9,7 +9,7 @@ This framework provides an end-to-end toolkit for A/B testing, covering:
 | Module | Description | Status |
 |--------|-------------|--------|
 | **Experiment Design** | Power analysis, sample size calculation, MDE estimation | ✅ Complete |
-| **Data Simulation** | Generate realistic A/B test datasets | 🔜 In Progress |
+| **Data Simulation** | Generate realistic A/B test datasets | ✅ Complete |
 | **Statistical Tests** | Frequentist (z-test, t-test) & Bayesian analysis | 🔜 Planned |
 | **Diagnostics** | SRM checks, novelty effects, AA validation | 🔜 Planned |
 | **Reporting** | Interactive HTML dashboards via Plotly + Jinja2 | 🔜 Planned |
@@ -97,6 +97,59 @@ days = experiment_duration_days(
 | `mde` | Minimum detectable effect as relative lift | Required |
 | `alpha` | Significance level (Type I error rate) | `0.05` |
 | `power` | Statistical power (1 − Type II error rate) | `0.80` |
+
+## 🎲 Data Simulation (Stage 2)
+
+The `data_simulation` module generates realistic experiment datasets with
+binary conversion and continuous revenue metrics, timestamps, and day-of-week
+traffic patterns.
+
+### Simulate a Standard A/B Test
+
+```python
+from src.data_simulation import simulate_ab_test
+
+df = simulate_ab_test(
+    n_control=5000,
+    n_treatment=5000,
+    control_rate=0.10,
+    treatment_rate=0.12,
+    avg_revenue_per_converter=45.0,
+    duration_days=30,
+    seed=42,
+)
+```
+
+Returns a DataFrame with columns:
+`user_id` · `variant` · `converted` · `revenue` · `timestamp` · `day_of_week`
+
+### Simulate an A/A Test
+
+```python
+from src.data_simulation import simulate_aa_test
+
+df = simulate_aa_test(n_per_variant=5000, rate=0.10, seed=42)
+```
+
+Both variants share the same underlying rate — used to validate
+no false positives exist before running a real experiment.
+
+### Simulate a Sample Ratio Mismatch
+
+```python
+from src.data_simulation import simulate_srm_scenario
+
+df = simulate_srm_scenario(
+    total_users=10000,
+    intended_split=0.50,
+    actual_control_split=0.60,
+)
+```
+
+Generates an intentionally imbalanced dataset to test SRM detection in
+the diagnostics module.
+
+---
 
 ## 🧪 Running Tests
 
