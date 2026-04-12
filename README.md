@@ -10,7 +10,7 @@ This framework provides an end-to-end toolkit for A/B testing, covering:
 |--------|-------------|--------|
 | **Experiment Design** | Power analysis, sample size calculation, MDE estimation | ✅ Complete |
 | **Data Simulation** | Generate realistic A/B test datasets | ✅ Complete |
-| **Statistical Tests** | Frequentist (z-test, t-test) & Bayesian analysis | 🔜 Planned |
+| **Statistical Tests** | Frequentist (z-test, t-test) & Bayesian analysis | ✅ Complete |
 | **Diagnostics** | SRM checks, novelty effects, AA validation | 🔜 Planned |
 | **Reporting** | Interactive HTML dashboards via Plotly + Jinja2 | 🔜 Planned |
 | **MLflow Tracking** | Experiment logging & comparison | 🔜 Planned |
@@ -148,6 +148,67 @@ df = simulate_srm_scenario(
 
 Generates an intentionally imbalanced dataset to test SRM detection in
 the diagnostics module.
+
+---
+
+## 📈 Statistical Tests (Stage 3)
+
+The `statistical_tests` module provides frequentist and Bayesian hypothesis
+testing for both binary (conversion) and continuous (revenue) metrics.
+
+### Frequentist — Z-Test for Proportions
+
+```python
+from src.statistical_tests import z_test_proportions
+
+result = z_test_proportions(
+    control_converted=1000,
+    control_total=10000,
+    treatment_converted=1200,
+    treatment_total=10000,
+)
+# result.significant   → True
+# result.p_value       → 0.000017
+# result.lift          → 0.20  (20% relative lift)
+# result.ci_lower      → 0.013
+# result.ci_upper      → 0.027
+```
+
+### Frequentist — Welch's T-Test for Continuous Metrics
+
+```python
+from src.statistical_tests import t_test_continuous
+import numpy as np
+
+rng = np.random.default_rng(42)
+control   = rng.normal(45.0, 10.0, 5000)
+treatment = rng.normal(50.0, 10.0, 5000)
+
+result = t_test_continuous(control, treatment)
+# result.significant   → True
+# result.lift          → ~0.11  (11% lift in revenue)
+# result.ci_lower/upper → CI on mean difference
+```
+
+### Bayesian — Beta-Binomial Analysis
+
+```python
+from src.statistical_tests import bayesian_ab_test
+
+result = bayesian_ab_test(
+    control_converted=800,
+    control_total=10000,
+    treatment_converted=1000,
+    treatment_total=10000,
+)
+# result.prob_treatment_wins  → 0.997  (P(B > A))
+# result.expected_loss        → 0.0001 (risk of choosing treatment)
+# result.ci_lower / ci_upper  → 95% credible interval on difference
+```
+
+The Bayesian model uses a **Beta-Binomial conjugate** with a uniform
+prior `Beta(1, 1)` by default, updated with observed data via 100,000
+Monte Carlo samples from the posterior.
 
 ---
 
