@@ -11,7 +11,7 @@ This framework provides an end-to-end toolkit for A/B testing, covering:
 | **Experiment Design** | Power analysis, sample size calculation, MDE estimation | ✅ Complete |
 | **Data Simulation** | Generate realistic A/B test datasets | ✅ Complete |
 | **Statistical Tests** | Frequentist (z-test, t-test) & Bayesian analysis | ✅ Complete |
-| **Diagnostics** | SRM checks, novelty effects, AA validation | 🔜 Planned |
+| **Diagnostics** | SRM checks, novelty effects, AA validation | ✅ Complete |
 | **Reporting** | Interactive HTML dashboards via Plotly + Jinja2 | 🔜 Planned |
 | **MLflow Tracking** | Experiment logging & comparison | 🔜 Planned |
 
@@ -209,6 +209,54 @@ result = bayesian_ab_test(
 The Bayesian model uses a **Beta-Binomial conjugate** with a uniform
 prior `Beta(1, 1)` by default, updated with observed data via 100,000
 Monte Carlo samples from the posterior.
+
+---
+
+## 🩺 Diagnostics (Stage 4)
+
+The `diagnostics` module ensures experiment data is trustworthy before interpreting results.
+
+### Sample Ratio Mismatch (SRM) Check
+
+Detects if the actual traffic split significantly deviates from the intended split, which usually indicates logging bugs or faulty randomization.
+
+```python
+from src.diagnostics import check_srm
+
+result = check_srm(
+    control_users=5150,
+    treatment_users=4850,
+    expected_control_proportion=0.50
+)
+# result.srm_detected → True (p < 0.001)
+# result.chi2_stat    → 9.0
+```
+
+### Novelty Effect Detection
+
+Detects if the treatment variant's success is just a temporary buzz that decays over time.
+
+```python
+from src.diagnostics import check_novelty_effect
+import pandas as pd
+
+daily_rates = pd.Series([0.12, 0.11, 0.10, 0.08, 0.07])
+result = check_novelty_effect(daily_rates)
+# result.novelty_detected → True
+# result.trend_slope      → -0.012
+```
+
+### Multiple Testing Correction
+
+Controls the Family-Wise Error Rate (FWER) when running multiple simultaneous hypothesis tests using the Holm-Bonferroni method.
+
+```python
+from src.diagnostics import holm_bonferroni_correction
+
+p_values = [0.01, 0.04, 0.03, 0.001]
+is_significant = holm_bonferroni_correction(p_values, alpha=0.05)
+# → [True, False, False, True]
+```
 
 ---
 
