@@ -12,7 +12,7 @@ This framework provides an end-to-end toolkit for A/B testing, covering:
 | **Data Simulation** | Generate realistic A/B test datasets | ✅ Complete |
 | **Statistical Tests** | Frequentist (z-test, t-test) & Bayesian analysis | ✅ Complete |
 | **Diagnostics** | SRM checks, novelty effects, AA validation | ✅ Complete |
-| **Reporting** | Interactive HTML dashboards via Plotly + Jinja2 | 🔜 Planned |
+| **Reporting** | Interactive HTML dashboards via Plotly + Jinja2 | ✅ Complete |
 | **MLflow Tracking** | Experiment logging & comparison | 🔜 Planned |
 
 ## 📐 Architecture
@@ -257,6 +257,58 @@ p_values = [0.01, 0.04, 0.03, 0.001]
 is_significant = holm_bonferroni_correction(p_values, alpha=0.05)
 # → [True, False, False, True]
 ```
+
+---
+
+## 📋 Reporting (Stage 5)
+
+The `reporting` module generates a self-contained HTML dashboard with
+embedded interactive Plotly charts — no server required, just open the file
+in any browser.
+
+### Generate a Report
+
+```python
+from src.data_simulation import simulate_ab_test
+from src.statistical_tests import z_test_proportions, bayesian_ab_test
+from src.diagnostics import check_srm, check_novelty_effect
+from src.reporting import generate_report
+import pandas as pd
+
+# 1. Simulate data
+df = simulate_ab_test(5000, 5000, 0.10, 0.12, seed=42)
+
+# 2. Run analyses
+control = df[df["variant"] == "control"]
+treatment = df[df["variant"] == "treatment"]
+
+freq = z_test_proportions(
+    control["converted"].sum(), len(control),
+    treatment["converted"].sum(), len(treatment),
+)
+bayes = bayesian_ab_test(
+    control["converted"].sum(), len(control),
+    treatment["converted"].sum(), len(treatment),
+)
+srm = check_srm(len(control), len(treatment))
+
+daily = df.copy()
+daily["date"] = daily["timestamp"].dt.date
+treatment_daily = daily[daily["variant"] == "treatment"].groupby("date")["converted"].mean()
+novelty = check_novelty_effect(treatment_daily)
+
+# 3. Generate report
+path = generate_report(df, freq, bayes, srm, novelty)
+# → reports/ab_test_report.html
+```
+
+The report includes:
+- **Summary cards** — Lift, P-Value, P(B > A), Ship/Hold decision
+- **Conversion rate chart** — Grouped bar comparison
+- **Revenue distribution** — Box plot for converters
+- **Daily trend** — Line chart tracking conversion over time
+- **Bayesian posterior** — Probability of winning visualization
+- **Diagnostic alerts** — SRM and novelty status indicators
 
 ---
 
