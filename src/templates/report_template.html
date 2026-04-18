@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A/B Test Report</title>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <style>
+    :root {
+      --background: #0f1117;
+      --card: #1e2130;
+      --text: #e0e0e0;
+      --muted: #a9adbc;
+      --green: #00d97e;
+      --red: #ef553b;
+      --border: #303447;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0;
+    }
+
+    header {
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 40px;
+      line-height: 1.1;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      flex: 1 1 220px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .value {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .ok {
+      color: var(--green);
+    }
+
+    .warning {
+      color: var(--red);
+    }
+
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin: 16px 0;
+      padding: 16px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+    }
+
+    .chart {
+      min-height: 420px;
+      width: 100%;
+    }
+
+    footer {
+      color: var(--muted);
+      margin-top: 32px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>A/B Test Report</h1>
+    </header>
+
+    <section class="row" aria-label="Summary">
+      <article class="card">
+        <div class="label">Lift</div>
+        <div class="value">{{ "%.2f"|format(freq.lift * 100) }}%</div>
+      </article>
+      <article class="card">
+        <div class="label">P-Value</div>
+        <div class="value">{{ "%.4f"|format(freq.p_value) }}</div>
+      </article>
+      <article class="card">
+        <div class="label">P(B > A)</div>
+        <div class="value">{{ "%.1f"|format(bayes.prob_treatment_wins * 100) }}%</div>
+      </article>
+      <article class="card">
+        <div class="label">Decision</div>
+        <div class="value {% if freq.significant %}ok{% else %}warning{% endif %}">
+          {% if freq.significant %}Ship It ✅{% else %}Hold Off ❌{% endif %}
+        </div>
+      </article>
+    </section>
+
+    <section class="row" aria-label="Sample sizes">
+      <article class="card">
+        <div class="label">Control Users</div>
+        <div class="value">{{ n_control }}</div>
+      </article>
+      <article class="card">
+        <div class="label">Treatment Users</div>
+        <div class="value">{{ n_treatment }}</div>
+      </article>
+    </section>
+
+    <section class="row" aria-label="Diagnostics">
+      <article class="card">
+        <div class="label">SRM</div>
+        {% if srm.srm_detected %}
+          <div class="value warning">Warning</div>
+        {% else %}
+          <div class="value ok">OK</div>
+        {% endif %}
+      </article>
+      <article class="card">
+        <div class="label">Novelty</div>
+        {% if novelty.novelty_detected %}
+          <div class="value warning">Warning</div>
+        {% else %}
+          <div class="value ok">OK</div>
+        {% endif %}
+      </article>
+    </section>
+
+    <section class="chart-card">
+      <div id="chart_conversion" class="chart"></div>
+      <script>
+        var data = {{ chart_conversion | safe }};
+        Plotly.newPlot('chart_conversion', data.data, data.layout, {responsive: true});
+      </script>
+    </section>
+
+    <section class="chart-card">
+      <div id="chart_revenue" class="chart"></div>
+      <script>
+        var data = {{ chart_revenue | safe }};
+        Plotly.newPlot('chart_revenue', data.data, data.layout, {responsive: true});
+      </script>
+    </section>
+
+    <section class="chart-card">
+      <div id="chart_daily" class="chart"></div>
+      <script>
+        var data = {{ chart_daily | safe }};
+        Plotly.newPlot('chart_daily', data.data, data.layout, {responsive: true});
+      </script>
+    </section>
+
+    <section class="chart-card">
+      <div id="chart_bayesian" class="chart"></div>
+      <script>
+        var data = {{ chart_bayesian | safe }};
+        Plotly.newPlot('chart_bayesian', data.data, data.layout, {responsive: true});
+      </script>
+    </section>
+
+    <footer>Generated by A/B Testing Framework</footer>
+  </main>
+</body>
+</html>
