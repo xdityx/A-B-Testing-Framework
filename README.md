@@ -13,7 +13,7 @@ This framework provides an end-to-end toolkit for A/B testing, covering:
 | **Statistical Tests** | Frequentist (z-test, t-test) & Bayesian analysis | ✅ Complete |
 | **Diagnostics** | SRM checks, novelty effects, AA validation | ✅ Complete |
 | **Reporting** | Interactive HTML dashboards via Plotly + Jinja2 | ✅ Complete |
-| **MLflow Tracking** | Experiment logging & comparison | 🔜 Planned |
+| **MLflow Tracking** | Experiment logging & comparison | ✅ Complete |
 
 ## 📐 Architecture
 
@@ -309,6 +309,44 @@ The report includes:
 - **Daily trend** — Line chart tracking conversion over time
 - **Bayesian posterior** — Probability of winning visualization
 - **Diagnostic alerts** — SRM and novelty status indicators
+
+---
+
+## 📦 MLflow Tracking (Stage 6)
+
+The `mlflow_tracking` module logs experiment parameters, metrics, and
+artifacts to MLflow for reproducibility and comparison across runs.
+
+### Log an Experiment
+
+```python
+from mlflow_tracking.log_experiment import log_experiment
+
+run_id = log_experiment(
+    experiment_name="checkout_button_test",
+    baseline_rate=0.10,
+    mde=0.05,
+    sample_size_per_variant=5000,
+    freq_result=freq,
+    bayesian_result=bayes,
+    srm_result=srm,
+    report_path="reports/ab_test_report.html",
+)
+```
+
+**Logged to MLflow:**
+- **Parameters** — baseline_rate, mde, sample_size, alpha
+- **Metrics** — p_value, lift, P(B > A), expected_loss, SRM status
+- **Tags** — ship/hold decision, SRM pass/fail
+- **Artifacts** — HTML report (if provided)
+
+### Compare Past Experiments
+
+```python
+from mlflow_tracking.log_experiment import compare_experiments
+
+df = compare_experiments("checkout_button_test")
+```
 
 ---
 
