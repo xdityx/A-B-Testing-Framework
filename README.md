@@ -24,10 +24,12 @@ ab_testing_framework/
 │   ├── data_simulation.py      # Simulated A/B test data generation
 │   ├── statistical_tests.py    # Frequentist & Bayesian hypothesis tests
 │   ├── diagnostics.py          # Pre/post-experiment health checks
-│   └── reporting.py            # HTML report generation
-├── tests/                      # Pytest test suite
-├── notebooks/                  # Jupyter notebook walkthroughs
+│   ├── reporting.py            # HTML report generation
+│   └── templates/              # Jinja2 HTML templates
+├── tests/                      # Pytest test suite (33 tests)
+├── notebooks/                  # End-to-end showcase notebook
 ├── mlflow_tracking/            # MLflow experiment logging
+├── pyproject.toml              # Project metadata & tool config
 ├── requirements.txt
 └── Dockerfile
 ```
@@ -36,8 +38,8 @@ ab_testing_framework/
 
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/ab_testing_framework.git
-cd ab_testing_framework
+git clone https://github.com/xdityx/A-B-Testing-Framework.git
+cd A-B-Testing-Framework
 
 # Install dependencies
 pip install -r requirements.txt
@@ -350,6 +352,44 @@ df = compare_experiments("checkout_button_test")
 
 ---
 
+## 📓 Notebook Showcase (Stage 7)
+
+The `notebooks/ab_test_showcase.py` file is a full end-to-end walkthrough
+using a real-world scenario: **testing a 1-click checkout button on an
+e-commerce site**.
+
+Open it in VS Code as a Jupyter notebook (percent format) or convert with
+`jupytext`.
+
+**Covers:**
+1. Power analysis & experiment design
+2. Data simulation with realistic parameters
+3. Pre-experiment diagnostics (SRM, novelty)
+4. Frequentist analysis (z-test with CIs)
+5. Bayesian analysis (posterior visualization)
+6. Revenue impact analysis (Welch's t-test)
+7. Report generation & ship/hold decision
+
+```bash
+# Run in VS Code: open the file → select "Run Cell" on each # %% block
+# Or convert to .ipynb:
+pip install jupytext
+jupytext --to notebook notebooks/ab_test_showcase.py
+```
+
+---
+
+## 🐳 Docker (Stage 8)
+
+Run the full test suite in an isolated container:
+
+```bash
+docker build -t ab-testing-framework .
+docker run ab-testing-framework
+```
+
+---
+
 ## 🧪 Running Tests
 
 ```bash
@@ -358,6 +398,9 @@ pytest tests/ -v
 
 # Run with coverage
 pytest tests/ --cov=src --cov-report=term-missing
+
+# Run via Docker
+docker run ab-testing-framework
 ```
 
 ## 🛠️ Tech Stack
