@@ -27,17 +27,18 @@ class FrequentistResult:
 
 @dataclass(frozen=True)
 class ContinuousResult:
-    """Container for Welch's t-test results on continuous outcomes."""
+    """Container for continuous outcome test results."""
 
     control_mean: float  # mean of control group
     treatment_mean: float  # mean of treatment group
     lift: float  # relative lift = (treatment_mean - control_mean) / control_mean
-    t_stat: float  # Welch's t-statistic
+    t_stat: float  # test statistic (t-stat or U-stat depending on test_type)
     p_value: float  # two-sided p-value
     ci_lower: float  # lower bound of 95% CI on difference in means
     ci_upper: float  # upper bound of 95% CI on difference in means
     significant: bool  # True if p_value < alpha
     alpha: float  # significance level used
+    test_type: str  # "welch_t" or "mann_whitney"
 
 
 @dataclass(frozen=True)
@@ -164,8 +165,9 @@ def t_test_continuous(
     control_values: np.ndarray,
     treatment_values: np.ndarray,
     alpha: float = 0.05,
+    use_mann_whitney: bool = False,
 ) -> ContinuousResult:
-    """Run a two-sided Welch's t-test for continuous outcomes.
+    """Run a two-sided test for continuous outcomes.
 
     Parameters
     ----------
@@ -175,13 +177,16 @@ def t_test_continuous(
         Sample of continuous observations from the treatment group.
     alpha : float, default=0.05
         Significance level used for the confidence interval and significance flag.
+    use_mann_whitney : bool, default=False
+        If True, use the non-parametric Mann-Whitney U test instead of
+        Welch's t-test. Useful when data is non-normal or heavily skewed.
 
     Returns
     -------
     ContinuousResult
-        Dataclass containing sample means, relative lift, Welch's t-statistic,
-        p-value, confidence interval on the difference in means, and the
-        significance flag.
+        Dataclass containing sample means, relative lift, test statistic,
+        p-value, confidence interval on the difference in means, the
+        significance flag, and which test was used.
 
     Examples
     --------
@@ -191,6 +196,8 @@ def t_test_continuous(
     >>> result = t_test_continuous(control, treatment)
     >>> result.treatment_mean > result.control_mean
     True
+    >>> result.test_type
+    'welch_t'
     """
     _validate_alpha(alpha)
 
@@ -199,16 +206,30 @@ def t_test_continuous(
     if control_array.size < 2 or treatment_array.size < 2:
         raise ValueError("Each input array must contain at least 2 observations.")
 
-    t_test_result = scipy.stats.ttest_ind(
-        treatment_array,
-        control_array,
-        equal_var=False,
-    )
-
     control_mean = float(np.mean(control_array))
     treatment_mean = float(np.mean(treatment_array))
     diff = treatment_mean - control_mean
 
+    if use_mann_whitney:
+        mw_result = scipy.stats.mannwhitneyu(
+            treatment_array,
+            control_array,
+            alternative="two-sided",
+        )
+        stat = float(mw_result.statistic)
+        p_value = float(mw_result.pvalue)
+        test_type = "mann_whitney"
+    else:
+        t_test_result = scipy.stats.ttest_ind(
+            treatment_array,
+            control_array,
+            equal_var=False,
+        )
+        stat = float(t_test_result.statistic)
+        p_value = float(t_test_result.pvalue)
+        test_type = "welch_t"
+
+    # Confidence interval on mean difference (always uses normal approx)
     treatment_std = float(np.std(treatment_array, ddof=1))
     control_std = float(np.std(control_array, ddof=1))
     n_treatment = treatment_array.size
@@ -228,12 +249,13 @@ def t_test_continuous(
         control_mean=control_mean,
         treatment_mean=treatment_mean,
         lift=float(_relative_lift(control_mean, treatment_mean)),
-        t_stat=float(t_test_result.statistic),
-        p_value=float(t_test_result.pvalue),
+        t_stat=stat,
+        p_value=p_value,
         ci_lower=float(ci_lower),
         ci_upper=float(ci_upper),
-        significant=bool(t_test_result.pvalue < alpha),
+        significant=bool(p_value < alpha),
         alpha=float(alpha),
+        test_type=test_type,
     )
 
 

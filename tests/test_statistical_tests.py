@@ -51,6 +51,7 @@ def test_t_test_significant_different_means() -> None:
 
     assert result.significant is True
     assert result.p_value < 0.05
+    assert result.test_type == "welch_t"
 
 
 def test_t_test_same_distribution_not_significant() -> None:
@@ -61,6 +62,7 @@ def test_t_test_same_distribution_not_significant() -> None:
     result = t_test_continuous(control, treatment)
 
     assert result.significant is False
+    assert result.test_type == "welch_t"
 
 
 def test_t_test_lift_direction() -> None:
@@ -70,6 +72,19 @@ def test_t_test_lift_direction() -> None:
 
     result = t_test_continuous(control, treatment)
 
+    assert result.lift > 0.0
+
+
+def test_mann_whitney_significant_different_means() -> None:
+    rng = np.random.default_rng(42)
+    control = rng.normal(45.0, 10.0, 5000)
+    treatment = rng.normal(50.0, 10.0, 5000)
+
+    result = t_test_continuous(control, treatment, use_mann_whitney=True)
+
+    assert result.significant is True
+    assert result.p_value < 0.05
+    assert result.test_type == "mann_whitney"
     assert result.lift > 0.0
 
 
