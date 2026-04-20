@@ -1,5 +1,7 @@
 # A/B Testing Framework
 
+[![CI](https://github.com/xdityx/A-B-Testing-Framework/actions/workflows/ci.yml/badge.svg)](https://github.com/xdityx/A-B-Testing-Framework/actions/workflows/ci.yml)
+
 A production-grade A/B testing framework built in Python — designed for designing, analyzing, and reporting on controlled experiments with statistical rigor.
 
 ## 🎯 Project Overview
@@ -387,6 +389,20 @@ Run the full test suite in an isolated container:
 docker build -t ab-testing-framework .
 docker run ab-testing-framework
 ```
+
+---
+
+## ⚙️ CI/CD (Stage 9)
+
+Automated testing and linting via GitHub Actions on every push and PR.
+
+**Pipeline runs:**
+- 🧪 **Tests** — Full pytest suite across Python 3.11 and 3.12
+- 📊 **Coverage** — Coverage report uploaded as artifact
+- 🧹 **Lint** — Ruff linter + formatter checks
+- 📦 **Cache** — pip dependency caching for fast runs
+
+See the [Actions tab](https://github.com/xdityx/A-B-Testing-Framework/actions) for run history.
 
 ---
 
