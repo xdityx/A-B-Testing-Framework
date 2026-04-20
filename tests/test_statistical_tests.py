@@ -76,6 +76,8 @@ def test_t_test_lift_direction() -> None:
 
 
 def test_mann_whitney_significant_different_means() -> None:
+    import math
+
     rng = np.random.default_rng(42)
     control = rng.normal(45.0, 10.0, 5000)
     treatment = rng.normal(50.0, 10.0, 5000)
@@ -86,6 +88,9 @@ def test_mann_whitney_significant_different_means() -> None:
     assert result.p_value < 0.05
     assert result.test_type == "mann_whitney"
     assert result.lift > 0.0
+    # Hodges-Lehmann CI: exact CIs unavailable in scipy → both bounds are NaN
+    assert math.isnan(result.ci_lower)
+    assert math.isnan(result.ci_upper)
 
 
 def test_bayesian_high_prob_treatment_wins() -> None:

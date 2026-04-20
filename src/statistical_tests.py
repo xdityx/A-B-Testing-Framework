@@ -180,6 +180,10 @@ def t_test_continuous(
     use_mann_whitney : bool, default=False
         If True, use the non-parametric Mann-Whitney U test instead of
         Welch's t-test. Useful when data is non-normal or heavily skewed.
+        When True, the point estimate reported in ``ci_lower``/``ci_upper``
+        is replaced by the Hodges-Lehmann estimator (median of all pairwise
+        differences). Exact CIs for Mann-Whitney are not available in scipy;
+        both bounds are set to ``float('nan')`` in that case.
 
     Returns
     -------
@@ -229,20 +233,26 @@ def t_test_continuous(
         p_value = float(t_test_result.pvalue)
         test_type = "welch_t"
 
-    # Confidence interval on mean difference
-    treatment_std = float(np.std(treatment_array, ddof=1))
-    control_std = float(np.std(control_array, ddof=1))
-    n_treatment = treatment_array.size
-    n_control = control_array.size
-    se = math.sqrt(treatment_std**2 / n_treatment + control_std**2 / n_control)
-
+    # Confidence interval branch
     if use_mann_whitney:
-        # Use normal approximation for CI when Mann-Whitney is selected
-        z_critical = scipy.stats.norm.ppf(1.0 - alpha / 2.0)
-        ci_lower = diff - z_critical * se
-        ci_upper = diff + z_critical * se
+        # Hodges-Lehmann point estimate: median of all pairwise differences
+        # treatment_i - control_j across the full cross-product of samples.
+        # Exact Mann-Whitney CIs are not implemented in scipy; ci bounds are NaN.
+        pairwise_diffs = (
+            treatment_array[:, np.newaxis] - control_array[np.newaxis, :]
+        ).ravel()
+        hl_estimate = float(np.median(pairwise_diffs))
+        ci_lower = float("nan")
+        ci_upper = float("nan")
+        # Use HL estimate as the primary difference measure for reporting
+        diff = hl_estimate
     else:
         # Use exact df from scipy's Welch's t-test result
+        treatment_std = float(np.std(treatment_array, ddof=1))
+        control_std = float(np.std(control_array, ddof=1))
+        n_treatment = treatment_array.size
+        n_control = control_array.size
+        se = math.sqrt(treatment_std**2 / n_treatment + control_std**2 / n_control)
         df = float(t_test_result.df)
         t_critical = scipy.stats.t.ppf(1.0 - alpha / 2.0, df)
         ci_lower = diff - t_critical * se
