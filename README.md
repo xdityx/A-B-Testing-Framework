@@ -47,7 +47,7 @@ cd A-B-Testing-Framework
 pip install -r requirements.txt
 
 # Run the test suite
-pytest tests/ -v
+python -m pytest tests/ -v
 ```
 
 ## 📊 Experiment Design (Stage 1)
@@ -410,10 +410,10 @@ See the [Actions tab](https://github.com/xdityx/A-B-Testing-Framework/actions) f
 
 ```bash
 # Run all tests
-pytest tests/ -v
+python -m pytest tests/ -v
 
 # Run with coverage
-pytest tests/ --cov=src --cov-report=term-missing
+python -m pytest tests/ --cov=src --cov-report=term-missing
 
 # Run via Docker
 docker run ab-testing-framework
