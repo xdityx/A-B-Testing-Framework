@@ -174,7 +174,7 @@ treatment_daily = daily[daily["variant"] == "treatment"].groupby("date")[
 
 novelty_result = check_novelty_effect(treatment_daily)
 print(f"Novelty effect detected: {novelty_result.novelty_detected}")
-print(f"Trend slope: {novelty_result.trend_slope:.6f}")
+print(f"Kendall's tau: {novelty_result.kendall_tau:.6f}")
 print(f"P-value: {novelty_result.p_value:.4f}")
 
 if novelty_result.novelty_detected:

@@ -247,7 +247,7 @@ import pandas as pd
 daily_rates = pd.Series([0.12, 0.11, 0.10, 0.08, 0.07])
 result = check_novelty_effect(daily_rates)
 # result.novelty_detected → True
-# result.trend_slope      → -0.012
+# result.kendall_tau      → -1.0
 ```
 
 ### Multiple Testing Correction

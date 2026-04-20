@@ -28,7 +28,7 @@ def test_novelty_detected_decaying_trend() -> None:
     result = check_novelty_effect(daily_rates)
 
     assert result.novelty_detected is True
-    assert result.trend_slope < 0.0
+    assert result.kendall_tau < 0.0
 
 
 def test_novelty_not_detected_flat_trend() -> None:

@@ -24,9 +24,9 @@ class SRMResult:
 class NoveltyResult:
     """Container for novelty-effect diagnostics."""
 
-    trend_slope: float  # slope of daily conversion rate over time
-    p_value: float  # significance of the slope
-    novelty_detected: bool  # True if p_value < alpha and trend_slope < 0
+    kendall_tau: float  # Kendall's tau rank correlation between time and conversion rate
+    p_value: float  # two-sided p-value from the Mann-Kendall trend test
+    novelty_detected: bool  # True if p_value < alpha and kendall_tau < 0 (declining trend)
 
 
 def _validate_alpha(alpha: float) -> None:
@@ -103,6 +103,9 @@ def check_novelty_effect(
 ) -> NoveltyResult:
     """Check whether conversion rates show a significant decaying time trend.
 
+    Uses the Mann-Kendall trend test (Kendall's tau rank correlation) which
+    is non-parametric and robust to non-normal distributions and outliers.
+
     Parameters
     ----------
     daily_rates : pandas.Series
@@ -113,7 +116,7 @@ def check_novelty_effect(
     Returns
     -------
     NoveltyResult
-        Dataclass containing the fitted slope, p-value for the slope, and a
+        Dataclass containing Kendall's tau, the two-sided p-value, and a
         boolean flag indicating whether a significant negative trend was found.
 
     Examples
@@ -132,11 +135,13 @@ def check_novelty_effect(
         raise ValueError("daily_rates must contain only finite numeric values.")
 
     days = np.arange(values.size, dtype=float)
-    slope, _intercept, _r_value, p_value, _std_err = scipy.stats.linregress(days, values)
-    novelty_detected = bool((p_value < alpha) and (slope < 0.0))
+    tau_result = scipy.stats.kendalltau(days, values)
+    kendall_tau = float(tau_result.statistic)
+    p_value = float(tau_result.pvalue)
+    novelty_detected = bool((p_value < alpha) and (kendall_tau < 0.0))
 
     return NoveltyResult(
-        trend_slope=float(slope),
+        kendall_tau=kendall_tau,
         p_value=float(p_value),
         novelty_detected=novelty_detected,
     )
