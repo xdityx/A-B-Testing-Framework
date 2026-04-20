@@ -229,21 +229,24 @@ def t_test_continuous(
         p_value = float(t_test_result.pvalue)
         test_type = "welch_t"
 
-    # Confidence interval on mean difference (always uses normal approx)
+    # Confidence interval on mean difference
     treatment_std = float(np.std(treatment_array, ddof=1))
     control_std = float(np.std(control_array, ddof=1))
     n_treatment = treatment_array.size
     n_control = control_array.size
-
     se = math.sqrt(treatment_std**2 / n_treatment + control_std**2 / n_control)
-    numerator = se**4
-    denominator = ((treatment_std**2 / n_treatment) ** 2) / (n_treatment - 1) + (
-        (control_std**2 / n_control) ** 2
-    ) / (n_control - 1)
-    df = numerator / denominator
-    t_critical = scipy.stats.t.ppf(1.0 - alpha / 2.0, df)
-    ci_lower = diff - t_critical * se
-    ci_upper = diff + t_critical * se
+
+    if use_mann_whitney:
+        # Use normal approximation for CI when Mann-Whitney is selected
+        z_critical = scipy.stats.norm.ppf(1.0 - alpha / 2.0)
+        ci_lower = diff - z_critical * se
+        ci_upper = diff + z_critical * se
+    else:
+        # Use exact df from scipy's Welch's t-test result
+        df = float(t_test_result.df)
+        t_critical = scipy.stats.t.ppf(1.0 - alpha / 2.0, df)
+        ci_lower = diff - t_critical * se
+        ci_upper = diff + t_critical * se
 
     return ContinuousResult(
         control_mean=control_mean,
@@ -267,7 +270,7 @@ def bayesian_ab_test(
     prior_alpha: float = 1.0,
     prior_beta: float = 1.0,
     n_samples: int = 100_000,
-    seed: int = 42,
+    seed: int | None = None,
 ) -> BayesianResult:
     """Run a Bayesian A/B test with Beta-Binomial posteriors.
 
@@ -287,8 +290,9 @@ def bayesian_ab_test(
         Beta parameter of the Beta prior for both variants.
     n_samples : int, default=100000
         Number of Monte Carlo posterior draws used for approximation.
-    seed : int, default=42
-        Seed passed to :func:`numpy.random.default_rng`.
+    seed : int or None, default=None
+        Seed passed to :func:`numpy.random.default_rng`. If None, a random
+        seed is used (non-reproducible).
 
     Returns
     -------

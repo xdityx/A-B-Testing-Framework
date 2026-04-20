@@ -89,24 +89,24 @@ def test_mann_whitney_significant_different_means() -> None:
 
 
 def test_bayesian_high_prob_treatment_wins() -> None:
-    result = bayesian_ab_test(800, 10000, 1000, 10000)
+    result = bayesian_ab_test(800, 10000, 1000, 10000, seed=42)
 
     assert result.prob_treatment_wins > 0.95
 
 
 def test_bayesian_aa_scenario_prob_near_half() -> None:
-    result = bayesian_ab_test(500, 5000, 500, 5000)
+    result = bayesian_ab_test(500, 5000, 500, 5000, seed=42)
 
     assert 0.40 < result.prob_treatment_wins < 0.60
 
 
 def test_bayesian_expected_loss_non_negative() -> None:
-    result = bayesian_ab_test(500, 5000, 500, 5000)
+    result = bayesian_ab_test(500, 5000, 500, 5000, seed=42)
 
     assert result.expected_loss >= 0.0
 
 
 def test_bayesian_credible_interval_contains_zero_for_aa() -> None:
-    result = bayesian_ab_test(500, 5000, 500, 5000)
+    result = bayesian_ab_test(500, 5000, 500, 5000, seed=42)
 
     assert result.ci_lower < 0.0 < result.ci_upper
