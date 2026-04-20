@@ -26,6 +26,7 @@ def sample_freq_result():
         control_rate=0.10,
         treatment_rate=0.12,
         lift=0.20,
+        cohens_h=0.0638,
         z_stat=1.96,
         p_value=0.04,
         ci_lower=0.001,

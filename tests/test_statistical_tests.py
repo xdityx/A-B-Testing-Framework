@@ -16,6 +16,7 @@ def test_z_test_significant_with_large_sample() -> None:
     assert result.significant is True
     assert result.p_value < 0.05
     assert result.lift == pytest.approx(0.20, rel=0.01)
+    assert result.cohens_h > 0.0  # positive effect size when treatment > control
 
 
 def test_z_test_not_significant_identical_rates() -> None:
@@ -24,6 +25,7 @@ def test_z_test_not_significant_identical_rates() -> None:
     assert result.significant is False
     assert result.z_stat == pytest.approx(0.0, abs=1e-10)
     assert result.p_value == pytest.approx(1.0, rel=0.01)
+    assert result.cohens_h == pytest.approx(0.0, abs=1e-10)
 
 
 def test_z_test_ci_contains_zero_for_null() -> None:

@@ -16,6 +16,7 @@ def _frequentist_result(
         control_rate=baseline_rate,
         treatment_rate=treatment_rate,
         lift=(treatment_rate - baseline_rate) / baseline_rate,
+        cohens_h=0.064,
         z_stat=3.1,
         p_value=0.002,
         ci_lower=0.01,

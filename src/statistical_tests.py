@@ -16,6 +16,7 @@ class FrequentistResult:
     control_rate: float  # observed conversion rate in control
     treatment_rate: float  # observed conversion rate in treatment
     lift: float  # relative lift = (treatment_rate - control_rate) / control_rate
+    cohens_h: float  # Cohen's h effect size = 2*arcsin(sqrt(p_t)) - 2*arcsin(sqrt(p_c))
     z_stat: float  # z-test statistic
     p_value: float  # two-sided p-value
     ci_lower: float  # lower bound of 95% CI on absolute difference
@@ -141,10 +142,15 @@ def z_test_proportions(
     ci_lower = diff - z_critical * se_diff
     ci_upper = diff + z_critical * se_diff
 
+    cohens_h = float(
+        2.0 * math.asin(math.sqrt(p_t)) - 2.0 * math.asin(math.sqrt(p_c))
+    )
+
     return FrequentistResult(
         control_rate=float(p_c),
         treatment_rate=float(p_t),
         lift=float(_relative_lift(p_c, p_t)),
+        cohens_h=cohens_h,
         z_stat=float(z_stat),
         p_value=float(p_value),
         ci_lower=float(ci_lower),
