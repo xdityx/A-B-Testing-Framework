@@ -143,9 +143,7 @@ def z_test_proportions(
     ci_lower = diff - z_critical * se_diff
     ci_upper = diff + z_critical * se_diff
 
-    cohens_h = float(
-        2.0 * math.asin(math.sqrt(p_t)) - 2.0 * math.asin(math.sqrt(p_c))
-    )
+    cohens_h = float(2.0 * math.asin(math.sqrt(p_t)) - 2.0 * math.asin(math.sqrt(p_c)))
 
     return FrequentistResult(
         control_rate=float(p_c),
@@ -180,10 +178,8 @@ def t_test_continuous(
     use_mann_whitney : bool, default=False
         If True, use the non-parametric Mann-Whitney U test instead of
         Welch's t-test. Useful when data is non-normal or heavily skewed.
-        When True, the point estimate reported in ``ci_lower``/``ci_upper``
-        is replaced by the Hodges-Lehmann estimator (median of all pairwise
-        differences). Exact CIs for Mann-Whitney are not available in scipy;
-        both bounds are set to ``float('nan')`` in that case.
+        Exact confidence intervals for Mann-Whitney are not available in
+        scipy; both CI bounds are set to ``float('nan')`` in that case.
 
     Returns
     -------
@@ -233,19 +229,9 @@ def t_test_continuous(
         p_value = float(t_test_result.pvalue)
         test_type = "welch_t"
 
-    # Confidence interval branch
     if use_mann_whitney:
-        # Hodges-Lehmann point estimate: median of all pairwise differences
-        # treatment_i - control_j across the full cross-product of samples.
-        # Exact Mann-Whitney CIs are not implemented in scipy; ci bounds are NaN.
-        pairwise_diffs = (
-            treatment_array[:, np.newaxis] - control_array[np.newaxis, :]
-        ).ravel()
-        hl_estimate = float(np.median(pairwise_diffs))
         ci_lower = float("nan")
         ci_upper = float("nan")
-        # Use HL estimate as the primary difference measure for reporting
-        diff = hl_estimate
     else:
         # Use exact df from scipy's Welch's t-test result
         treatment_std = float(np.std(treatment_array, ddof=1))
