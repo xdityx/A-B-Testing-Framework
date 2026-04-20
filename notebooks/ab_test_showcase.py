@@ -123,7 +123,7 @@ df = simulate_ab_test(
     control_rate=BASELINE_RATE,
     treatment_rate=TREATMENT_RATE,
     avg_revenue_per_converter=67.50,
-    duration_days=int(np.ceil(days)),
+    duration_days=max(int(np.ceil(days)), 14),
     seed=42,
 )
 
