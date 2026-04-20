@@ -144,9 +144,7 @@ def simulate_ab_test(
     start_timestamp = _resolve_start_date(start_date)
 
     control_converted = rng.binomial(1, control_rate, size=n_control).astype(np.int64)
-    treatment_converted = rng.binomial(1, treatment_rate, size=n_treatment).astype(
-        np.int64
-    )
+    treatment_converted = rng.binomial(1, treatment_rate, size=n_treatment).astype(np.int64)
 
     control_revenue = _simulate_revenue(
         rng,
@@ -173,22 +171,14 @@ def simulate_ab_test(
                     np.full(n_treatment, "treatment", dtype=object),
                 )
             ),
-            "converted": np.concatenate(
-                (control_converted, treatment_converted)
-            ).astype(np.int64),
-            "revenue": np.concatenate((control_revenue, treatment_revenue)).astype(
-                float
-            ),
+            "converted": np.concatenate((control_converted, treatment_converted)).astype(np.int64),
+            "revenue": np.concatenate((control_revenue, treatment_revenue)).astype(float),
             "timestamp": timestamps.to_numpy(),
         }
     )
     dataframe["day_of_week"] = dataframe["timestamp"].dt.day_name()
-    dataframe = dataframe.sort_values("timestamp", kind="mergesort").reset_index(
-        drop=True
-    )
-    return dataframe[
-        ["user_id", "variant", "converted", "revenue", "timestamp", "day_of_week"]
-    ]
+    dataframe = dataframe.sort_values("timestamp", kind="mergesort").reset_index(drop=True)
+    return dataframe[["user_id", "variant", "converted", "revenue", "timestamp", "day_of_week"]]
 
 
 def simulate_aa_test(

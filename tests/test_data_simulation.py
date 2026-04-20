@@ -51,9 +51,7 @@ def test_user_ids_are_sequential_and_unique() -> None:
     n_treatment = 1000
     dataframe = simulate_ab_test(n_control, n_treatment, 0.10, 0.12, seed=42)
 
-    assert sorted(dataframe["user_id"].tolist()) == list(
-        range(1, n_control + n_treatment + 1)
-    )
+    assert sorted(dataframe["user_id"].tolist()) == list(range(1, n_control + n_treatment + 1))
     assert dataframe["user_id"].is_unique
 
 

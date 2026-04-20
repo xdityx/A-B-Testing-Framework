@@ -34,9 +34,9 @@ def _build_report(tmp_path: pathlib.Path) -> pathlib.Path:
         seed=42,
     )
     srm_result = check_srm(len(control), len(treatment))
-    daily_rates = dataframe.assign(date=dataframe["timestamp"].dt.date).groupby("date")[
-        "converted"
-    ].mean()
+    daily_rates = (
+        dataframe.assign(date=dataframe["timestamp"].dt.date).groupby("date")["converted"].mean()
+    )
     novelty_result = check_novelty_effect(daily_rates)
 
     return generate_report(

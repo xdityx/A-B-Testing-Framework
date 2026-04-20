@@ -1,17 +1,10 @@
 """Shared pytest fixtures used across test modules."""
 
-import numpy as np
-import pandas as pd
 import pytest
 
 from src.data_simulation import simulate_ab_test
-from src.diagnostics import NoveltyResult, SRMResult, check_novelty_effect, check_srm
-from src.statistical_tests import (
-    BayesianResult,
-    FrequentistResult,
-    bayesian_ab_test,
-    z_test_proportions,
-)
+from src.diagnostics import SRMResult
+from src.statistical_tests import BayesianResult, FrequentistResult
 
 
 @pytest.fixture

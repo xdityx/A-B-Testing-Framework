@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import math
+from dataclasses import dataclass
 
 import numpy as np
 import scipy.stats
@@ -127,9 +127,7 @@ def z_test_proportions(
     p_t = treatment_converted / treatment_total
 
     p_pool = (control_converted + treatment_converted) / (control_total + treatment_total)
-    se_pool = math.sqrt(
-        p_pool * (1.0 - p_pool) * (1.0 / control_total + 1.0 / treatment_total)
-    )
+    se_pool = math.sqrt(p_pool * (1.0 - p_pool) * (1.0 / control_total + 1.0 / treatment_total))
     diff = p_t - p_c
     if se_pool == 0.0:
         z_stat = 0.0 if diff == 0.0 else math.copysign(math.inf, diff)
@@ -138,9 +136,7 @@ def z_test_proportions(
 
     p_value = 2.0 * (1.0 - scipy.stats.norm.cdf(abs(z_stat)))
 
-    se_diff = math.sqrt(
-        p_c * (1.0 - p_c) / control_total + p_t * (1.0 - p_t) / treatment_total
-    )
+    se_diff = math.sqrt(p_c * (1.0 - p_c) / control_total + p_t * (1.0 - p_t) / treatment_total)
     z_critical = scipy.stats.norm.ppf(1.0 - alpha / 2.0)
     ci_lower = diff - z_critical * se_diff
     ci_upper = diff + z_critical * se_diff
@@ -212,14 +208,11 @@ def t_test_continuous(
     n_treatment = treatment_array.size
     n_control = control_array.size
 
-    se = math.sqrt(
-        treatment_std**2 / n_treatment + control_std**2 / n_control
-    )
+    se = math.sqrt(treatment_std**2 / n_treatment + control_std**2 / n_control)
     numerator = se**4
-    denominator = (
-        ((treatment_std**2 / n_treatment) ** 2) / (n_treatment - 1)
-        + ((control_std**2 / n_control) ** 2) / (n_control - 1)
-    )
+    denominator = ((treatment_std**2 / n_treatment) ** 2) / (n_treatment - 1) + (
+        (control_std**2 / n_control) ** 2
+    ) / (n_control - 1)
     df = numerator / denominator
     t_critical = scipy.stats.t.ppf(1.0 - alpha / 2.0, df)
     ci_lower = diff - t_critical * se
