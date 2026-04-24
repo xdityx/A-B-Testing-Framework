@@ -44,9 +44,7 @@ class SPRTResult:
     """
 
     can_stop: bool
-    stop_reason: Literal[
-        "CONTINUE", "STOP_FOR_TREATMENT", "STOP_FOR_CONTROL", "INCONCLUSIVE"
-    ]
+    stop_reason: Literal["CONTINUE", "STOP_FOR_TREATMENT", "STOP_FOR_CONTROL", "INCONCLUSIVE"]
     log_likelihood_ratio: float
     boundary_upper: float
     boundary_lower: float
@@ -56,6 +54,7 @@ class SPRTResult:
 # ---------------------------------------------------------------------------
 # Validation helpers
 # ---------------------------------------------------------------------------
+
 
 def _validate_counts(
     control_converted: int,
@@ -94,6 +93,7 @@ def _validate_error_rates(alpha: float, beta: float) -> None:
 # Core SPRT logic
 # ---------------------------------------------------------------------------
 
+
 def _safe_log(x: float) -> float:
     """Return ``log(x)`` clamping *x* away from zero to avoid -inf."""
     return math.log(max(x, 1e-300))
@@ -119,15 +119,13 @@ def _compute_log_lr(
     c_non = control_total - control_converted
 
     # Treatment arm: H1 says p_h1, H0 says p_h0
-    log_lr = (
-        t_conv * (_safe_log(p_h1) - _safe_log(p_h0))
-        + t_non * (_safe_log(1.0 - p_h1) - _safe_log(1.0 - p_h0))
+    log_lr = t_conv * (_safe_log(p_h1) - _safe_log(p_h0)) + t_non * (
+        _safe_log(1.0 - p_h1) - _safe_log(1.0 - p_h0)
     )
     # Control arm: both hypotheses say p_h0 → contribution is zero.
     # (Included explicitly for clarity; the terms cancel.)
-    log_lr += (
-        c_conv * (_safe_log(p_h0) - _safe_log(p_h0))
-        + c_non * (_safe_log(1.0 - p_h0) - _safe_log(1.0 - p_h0))
+    log_lr += c_conv * (_safe_log(p_h0) - _safe_log(p_h0)) + c_non * (
+        _safe_log(1.0 - p_h0) - _safe_log(1.0 - p_h0)
     )
 
     return float(log_lr)
@@ -212,8 +210,8 @@ def sequential_z_test(
     p_h0 = baseline_rate
     p_h1 = baseline_rate * (1.0 + mde)
 
-    log_a = math.log((1.0 - beta) / alpha)      # upper boundary
-    log_b = math.log(beta / (1.0 - alpha))       # lower boundary (negative)
+    log_a = math.log((1.0 - beta) / alpha)  # upper boundary
+    log_b = math.log(beta / (1.0 - alpha))  # lower boundary (negative)
 
     # Edge case: zero conversions in both arms — no information yet.
     if control_converted == 0 and treatment_converted == 0:
@@ -224,14 +222,21 @@ def sequential_z_test(
             boundary_upper=log_a,
             boundary_lower=log_b,
             samples_needed=_estimate_samples_needed(
-                0.0, log_a, p_h0, p_h1, control_total + treatment_total,
+                0.0,
+                log_a,
+                p_h0,
+                p_h1,
+                control_total + treatment_total,
             ),
         )
 
     log_lr = _compute_log_lr(
-        control_converted, control_total,
-        treatment_converted, treatment_total,
-        p_h0, p_h1,
+        control_converted,
+        control_total,
+        treatment_converted,
+        treatment_total,
+        p_h0,
+        p_h1,
     )
 
     if log_lr >= log_a:
@@ -261,6 +266,10 @@ def sequential_z_test(
         boundary_upper=log_a,
         boundary_lower=log_b,
         samples_needed=_estimate_samples_needed(
-            log_lr, log_a, p_h0, p_h1, control_total + treatment_total,
+            log_lr,
+            log_a,
+            p_h0,
+            p_h1,
+            control_total + treatment_total,
         ),
     )

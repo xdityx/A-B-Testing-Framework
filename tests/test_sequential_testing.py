@@ -7,12 +7,12 @@ import math
 import numpy as np
 import pytest
 
-from src.sequential_testing import SPRTResult, sequential_z_test
-
+from src.sequential_testing import sequential_z_test
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _simulate_binomial(rate: float, n: int, seed: int = 42) -> int:
     """Return the number of successes from *n* Bernoulli(rate) trials."""
@@ -23,6 +23,7 @@ def _simulate_binomial(rate: float, n: int, seed: int = 42) -> int:
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 class TestSequentialZTest:
     """Suite covering SPRT decision logic, boundary math, and edge cases."""
@@ -87,8 +88,8 @@ class TestSequentialZTest:
     def test_boundaries_computed_correctly(self) -> None:
         """Verify log_A and log_B against the Wald formulae."""
         alpha, beta = 0.05, 0.20
-        expected_upper = math.log((1.0 - beta) / alpha)   # log(16)
-        expected_lower = math.log(beta / (1.0 - alpha))    # log(4/19)
+        expected_upper = math.log((1.0 - beta) / alpha)  # log(16)
+        expected_lower = math.log(beta / (1.0 - alpha))  # log(4/19)
 
         result = sequential_z_test(
             control_converted=50,
@@ -119,9 +120,12 @@ class TestSequentialZTest:
     def test_invalid_inputs_raise(self) -> None:
         """Bad counts, rates, and error-rate args all raise ValueError."""
         base = dict(
-            control_converted=10, control_total=100,
-            treatment_converted=12, treatment_total=100,
-            baseline_rate=0.10, mde=0.20,
+            control_converted=10,
+            control_total=100,
+            treatment_converted=12,
+            treatment_total=100,
+            baseline_rate=0.10,
+            mde=0.20,
         )
         # Negative counts
         with pytest.raises(ValueError):

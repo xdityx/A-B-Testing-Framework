@@ -6,13 +6,13 @@ from dataclasses import dataclass
 
 import pytest
 
-from src.experiment_decision import ExperimentDecision, make_decision
-
+from src.experiment_decision import make_decision
 
 # ---------------------------------------------------------------------------
 # Lightweight stubs — mirror the frozen dataclass signatures without
 # importing the real modules so tests stay focused on decision logic.
 # ---------------------------------------------------------------------------
+
 
 @dataclass(frozen=True)
 class _FreqStub:
@@ -58,6 +58,7 @@ class _NoveltyStub:
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 class TestMakeDecision:
     """Suite covering the SHIP / HOLD / INCONCLUSIVE decision matrix."""

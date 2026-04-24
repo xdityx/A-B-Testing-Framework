@@ -52,15 +52,11 @@ def _build_reasoning(
         lines.append("SRM: PASSED")
 
     if novelty_result.novelty_detected:
-        lines.append(
-            f"Novelty: DETECTED - kendall_tau={novelty_result.kendall_tau:.2f}"
-        )
+        lines.append(f"Novelty: DETECTED - kendall_tau={novelty_result.kendall_tau:.2f}")
     else:
         lines.append("Novelty: NOT DETECTED")
 
-    lines.append(
-        f"Frequentist: p={freq_result.p_value:.4f}, lift={freq_result.lift:.2%}"
-    )
+    lines.append(f"Frequentist: p={freq_result.p_value:.4f}, lift={freq_result.lift:.2%}")
     lines.append(
         f"Bayesian: P(B>A)={bayes_result.prob_treatment_wins:.4f}, "
         f"EL={bayes_result.expected_loss:.4f}"

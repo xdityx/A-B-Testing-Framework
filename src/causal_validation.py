@@ -76,12 +76,9 @@ def validate_experiment_assumptions(
     sutva_ok = randomization_level == metric_level
     if not sutva_ok:
         warnings.append(
-            f"SUTVA violation: randomized at {randomization_level} "
-            f"but measuring at {metric_level}"
+            f"SUTVA violation: randomized at {randomization_level} but measuring at {metric_level}"
         )
-        notes_parts.append(
-            f"Cluster at {randomization_level} level to fix SUTVA"
-        )
+        notes_parts.append(f"Cluster at {randomization_level} level to fix SUTVA")
 
     # -- Assignment balance --
     counts = df["variant"].value_counts()
@@ -90,9 +87,7 @@ def validate_experiment_assumptions(
     actual_split = n_control / n_total if n_total > 0 else 0.0
     assignment_balanced = abs(actual_split - expected_split) <= tolerance
     if not assignment_balanced:
-        warnings.append(
-            f"Split is {actual_split:.1%}, expected {expected_split:.1%}"
-        )
+        warnings.append(f"Split is {actual_split:.1%}, expected {expected_split:.1%}")
         notes_parts.append("Reweight samples for balance")
 
     # -- Confounding risk --
