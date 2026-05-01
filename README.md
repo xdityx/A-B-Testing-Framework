@@ -4,6 +4,15 @@
 
 A production-grade A/B testing framework built in Python — designed for designing, analyzing, and reporting on controlled experiments with statistical rigor.
 
+---
+## 🚀 Live Demo
+
+**Try the interactive web interface:** [A/B Testing Framework on Streamlit Cloud](https://a-b-testing-framework-mkbmuqqzyng7ivqk25qrae.streamlit.app/)
+
+Explore experiment design, run simulations, analyze results, and see Bayesian posteriors in action.
+
+---
+
 ## 🎯 Project Overview
 
 This framework provides an end-to-end toolkit for A/B testing, covering:
